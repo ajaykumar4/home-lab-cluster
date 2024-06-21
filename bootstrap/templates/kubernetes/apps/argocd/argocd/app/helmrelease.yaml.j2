@@ -1,0 +1,51 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: argocd
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: argo-cd
+      version: 7.1.1
+      sourceRef:
+        kind: HelmRepository
+        name: argo
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    crds:
+      install: true
+    global:
+      domain: "argocd.${SECRET_DOMAIN}"
+    configs:
+      params:
+        server.insecure: true
+      cm:
+        statusbadge.enabled: true
+      secret:
+        argocdServerAdminPassword: "${SECERT_ARGOCD_ADMIN_PASSWORD}"
+        githubSecret: "${GITHUB_WEBHOOK_TOKEN}"
+    server:
+      allowAnyNamespace: true
+      certificate:
+        enabled: true
+        secretName: argocd-server-tls
+        domain: "argocd.${SECRET_DOMAIN}"
+        issuer:
+          group: cert-manager.io
+          kind: ClusterIssuer
+          name: letsencrypt-production
+      ingress:
+        enabled: true
+        ingressClassName: external
+        annotations:
+          external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
+        hostname: "argocd.${SECRET_DOMAIN}"
