@@ -1,0 +1,140 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
+---
+# renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+talosVersion: v1.7.5
+# renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+kubernetesVersion: v1.30.2
+
+clusterName: "aj-home-lab"
+endpoint: https://192.168.1.250:6443
+clusterPodNets:
+  - "10.69.0.0/16"
+clusterSvcNets:
+  - "10.96.0.0/16"
+additionalApiServerCertSans: &sans
+  - "192.168.1.250"
+  - 127.0.0.1 # KubePrism
+  - "86.43.201.200"
+  - "k8s.ajaykumar.ie"
+  - "ajaykumar.ie"
+additionalMachineCertSans: *sans
+
+# Disable built-in Flannel to use Cilium
+cniConfig:
+  name: none
+
+nodes:
+  - hostname: "rpi01"
+    ipAddress: "192.168.1.4"
+    installDisk: "/dev/mmcblk0"
+    talosImageURL: factory.talos.dev/installer/04d4078b3c5d84c71491d9d7acfb48423098225eb2037448a56c0da12cf379a6
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "e4:5f:01:47:71:6b"
+        dhcp: false
+        addresses:
+          - "192.168.1.4/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.1.254"
+        mtu: 1500
+        vip:
+          ip: "192.168.1.250"
+    extraManifests:
+      - patches/extension/tailscale.yaml
+  - hostname: "rpi02"
+    ipAddress: "192.168.1.5"
+    installDisk: "/dev/mmcblk0"
+    talosImageURL: factory.talos.dev/installer/04d4078b3c5d84c71491d9d7acfb48423098225eb2037448a56c0da12cf379a6
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "e4:5f:01:47:6b:50"
+        dhcp: false
+        addresses:
+          - "192.168.1.5/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.1.254"
+        mtu: 1500
+        vip:
+          ip: "192.168.1.250"
+    extraManifests:
+      - patches/extension/tailscale.yaml
+  - hostname: "rpi03"
+    ipAddress: "192.168.1.6"
+    installDisk: "/dev/mmcblk0"
+    talosImageURL: factory.talos.dev/installer/04d4078b3c5d84c71491d9d7acfb48423098225eb2037448a56c0da12cf379a6
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "e4:5f:01:47:74:c8"
+        dhcp: false
+        addresses:
+          - "192.168.1.6/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.1.254"
+        mtu: 1500
+        vip:
+          ip: "192.168.1.250"
+    extraManifests:
+      - patches/extension/tailscale.yaml
+  - hostname: "jetson01"
+    ipAddress: "192.168.1.7"
+    installDisk: "/dev/mmcblk1"
+    talosImageURL: factory.talos.dev/installer/cc93087ce425dbefb9648afca095901bc6d080f20a631848432f99757000bc0d
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "48:b0:2d:3c:c0:ae"
+        dhcp: false
+        addresses:
+          - "192.168.1.7/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.1.254"
+        mtu: 1500
+        vip:
+          ip: "192.168.1.250"
+    extraManifests:
+      - patches/extension/tailscale.yaml
+  - hostname: "jetson02"
+    ipAddress: "192.168.1.8"
+    installDisk: "/dev/mmcblk1"
+    talosImageURL: factory.talos.dev/installer/cc93087ce425dbefb9648afca095901bc6d080f20a631848432f99757000bc0d
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "48:b0:2d:3c:c0:ab"
+        dhcp: false
+        addresses:
+          - "192.168.1.8/24"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "192.168.1.254"
+        mtu: 1500
+        vip:
+          ip: "192.168.1.250"
+    extraManifests:
+      - patches/extension/tailscale.yaml
+
+# Global patches
+patches:
+  - "@./patches/global/cluster-discovery.yaml"
+  - "@./patches/global/containerd.yaml"
+  - "@./patches/global/disable-search-domain.yaml"
+  - "@./patches/global/hostdns.yaml"
+  - "@./patches/global/kubelet.yaml"
+  - "@./patches/global/openebs-local.yaml"
+  - "@./patches/global/sysctl.yaml"
+
+# Controller patches
+controlPlane:
+  patches:
+    - "@./patches/controller/api-access.yaml"
+    - "@./patches/controller/cluster.yaml"
+    - "@./patches/controller/disable-admission-controller.yaml"
+    - "@./patches/controller/etcd.yaml"
+
