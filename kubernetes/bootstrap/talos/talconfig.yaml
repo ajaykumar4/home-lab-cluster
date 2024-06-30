@@ -45,9 +45,10 @@ nodes:
       - name: tailscale
         configFiles:
         environment:
-          - TS_AUTHKEY="tskey-auth-kf3xPyThS621CNTRL-ouLgtUYHmTJwzJiFxhSUUJfiYR4YoMqj6"
-          - TS_ROUTES=192.168.8.0/24
-          - TS_EXTRA_ARGS=--auto-update
+          - TS_AUTHKEY=${TS_AUTHKEY}
+          - TS_ROUTES=${TS_ROUTES}
+          - TS_ACCEPT_DNS=true
+          - TS_AUTH_ONCE=true
   - hostname: "rpi02"
     ipAddress: "192.168.8.5"
     installDisk: "/dev/mmcblk0"
@@ -69,9 +70,10 @@ nodes:
       - name: tailscale
         configFiles:
         environment:
-          - TS_AUTHKEY="tskey-auth-kf3xPyThS621CNTRL-ouLgtUYHmTJwzJiFxhSUUJfiYR4YoMqj6"
-          - TS_ROUTES=192.168.8.0/24
-          - TS_EXTRA_ARGS=--auto-update
+          - TS_AUTHKEY=${TS_AUTHKEY}
+          - TS_ROUTES=${TS_ROUTES}
+          - TS_ACCEPT_DNS=true
+          - TS_AUTH_ONCE=true
   - hostname: "rpi03"
     ipAddress: "192.168.8.6"
     installDisk: "/dev/mmcblk0"
@@ -93,9 +95,10 @@ nodes:
       - name: tailscale
         configFiles:
         environment:
-          - TS_AUTHKEY="tskey-auth-kf3xPyThS621CNTRL-ouLgtUYHmTJwzJiFxhSUUJfiYR4YoMqj6"
-          - TS_ROUTES=192.168.8.0/24
-          - TS_EXTRA_ARGS=--auto-update
+          - TS_AUTHKEY=${TS_AUTHKEY}
+          - TS_ROUTES=${TS_ROUTES}
+          - TS_ACCEPT_DNS=true
+          - TS_AUTH_ONCE=true
   - hostname: "jetson01"
     ipAddress: "192.168.8.7"
     installDisk: "/dev/mmcblk1"
@@ -117,9 +120,10 @@ nodes:
       - name: tailscale
         configFiles:
         environment:
-          - TS_AUTHKEY="tskey-auth-kf3xPyThS621CNTRL-ouLgtUYHmTJwzJiFxhSUUJfiYR4YoMqj6"
-          - TS_ROUTES=192.168.8.0/24
-          - TS_EXTRA_ARGS=--auto-update
+          - TS_AUTHKEY=${TS_AUTHKEY}
+          - TS_ROUTES=${TS_ROUTES}
+          - TS_ACCEPT_DNS=true
+          - TS_AUTH_ONCE=true
   - hostname: "jetson02"
     ipAddress: "192.168.8.8"
     installDisk: "/dev/mmcblk1"
@@ -141,12 +145,28 @@ nodes:
       - name: tailscale
         configFiles:
         environment:
-          - TS_AUTHKEY="tskey-auth-kf3xPyThS621CNTRL-ouLgtUYHmTJwzJiFxhSUUJfiYR4YoMqj6"
-          - TS_ROUTES=192.168.8.0/24
-          - TS_EXTRA_ARGS=--auto-update
+          - TS_AUTHKEY=${TS_AUTHKEY}
+          - TS_ROUTES=${TS_ROUTES}
+          - TS_ACCEPT_DNS=true
+          - TS_AUTH_ONCE=true
 
 # Global patches
 patches:
+  - # Force nameserver
+    |-
+    machine:
+      network:
+        nameservers:
+          - 1.1.1.1
+          - 192.168.8.2
+          - 1.0.0.1
+  - # Configure NTP
+    |-
+    machine:
+      time:
+        disabled: false
+        servers:
+          - time.cloudflare.com
   - "@./patches/global/cluster-discovery.yaml"
   - "@./patches/global/containerd.yaml"
   - "@./patches/global/disable-search-domain.yaml"
